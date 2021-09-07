@@ -35,8 +35,7 @@ async function chochhandler(req,res){
     console.log('hi');
 let chochoData=await axios.get('https://ltuc-asac-api.herokuapp.com/allChocolateData');
 
-console.log(chochoData);
-res.send(chochoData);
+res.send(chochoData.data);
 
 }
 
