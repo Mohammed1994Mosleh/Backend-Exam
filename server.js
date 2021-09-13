@@ -10,18 +10,19 @@ server.use(express.json());
 const mongoose = require('mongoose');
 const PORT = process.env.PORT 
 // mongoose.connect(`${process.env.ATLAs}`,{useNewUrlParser:true,useUnifiedTopology:true});
-mongoose.connect('mongodb://localhost:27017/choco');
+mongoose.connect(`${process.env.ATLAs}`, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const chocoschema = new mongoose.Schema({
     title:  String, 
-   
     imageUrl:   String,
-   
-    email:String
+    description: String,
+    price:String,
+    email:String,
+    
    
   });
 
-  const chocoModel = mongoose.model('choco', chocoschema);
+  const chocoModel = mongoose.model('Cholcolate', chocoschema);
 
 
 
@@ -29,23 +30,30 @@ server.get('/getchocolate',chochhandler);
 server.get('/getfav',favioratehandler);
 server.delete('/delete/:id',deletehandler);
 server.put('/Update/:id',updatehandler);
-server.put('/Add',Addhandler);
+server.post('/Add',Addhandler);
 
 async function chochhandler(req,res){
     console.log('hi');
 let chochoData=await axios.get('https://ltuc-asac-api.herokuapp.com/allChocolateData');
 
-res.send(chochoData.data);
+let newArr=chochoData.data.map(item=>{
+    return new Choho(item.id,item.title,item.price,item.description,item.imageUrl)
+})
+
+
+res.send(newArr);
 
 }
 
 
  function favioratehandler(req,res){
 let email=req.query.email;
+console.log(email);
 chocoModel.find({email},function(err,data){
 if(err){
     console.log('error in getting data');
 }else{
+    console.log(data);
     res.send(data)
 }
 })
@@ -72,9 +80,11 @@ async function deletehandler(req,res){
 }
     
 async function Addhandler(req,res){
-   let {title,imageUrl,email}=req.body;
+   let {title,imageUrl,description,price}=req.body;
+   console.log(price);
+   let email=req.query.email;
    
-  await chocoModel.create({title,imageUrl,email});
+  await chocoModel.create({title,imageUrl,description,price, email});
    chocoModel.find({email},function(err,data){
     if(err){
         console.log('error in getting data');
@@ -90,6 +100,7 @@ async function Addhandler(req,res){
        
         let id=req.params.id;
         let {title,imageUrl,email}=req.body;
+        
         chocoModel.findOne({_id:id},(error,selected)=>{
 
             selected.title=title;
@@ -112,6 +123,16 @@ async function Addhandler(req,res){
     }
 
     
+    class Choho  {
+        constructor(id,title,price,description,imageUrl){
+            this.id=id,
+            this.title=title,
+            this.price=price,
+            this.description=description,
+            this.imageUrl=imageUrl
+
+       }
+    }
 
 
 
